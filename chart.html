@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script src="Charts.js"></script>
+  <script src="long-short-browser.js"></script>
+  <script src="cors-api.js"></script>
+  <script src="main.js"></script>
+  <script src="chart.js"></script>
+  <link rel="stylesheet" type="text/css" href="browser-trader-style.css">
+  <link rel="stylesheet" type="text/css" href="mainpage.css">
+  <body>
+    <div id="icon"><i class="material-icons md-36">home</i></div>
+    <button type="button" class="runButton" onclick="runScript();">RUN SCRIPT</button>
+    <button type="button" class="killButton" onclick="killScript();">KILL SCRIPT</button>
+    <div id="chart-container">
+      <canvas id="main_chart"></canvas>
+    </div>
+   </body>
+</html>

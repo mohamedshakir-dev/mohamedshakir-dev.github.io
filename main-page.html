@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trading Bot</title>
+
+  <!-- Resource files -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  <!-- Local files -->
+  <link rel="stylesheet" type="text/css" href="browser-trader-style.css"/>
+  <link rel="stylesheet" type="text/css" href="mainpage.css">
+  <script src="Charts.js"></script>
+  <script src="long-short-browser.js"></script>
+  <script src="cors-api.js"></script>
+  <script src="main.js"></script>
+</head>
+<body style="background-color:#161616">
+  <div id=header-container>
+      <button type="button" id="runButton" onclick="runScript();">RUN SCRIPT</button>
+      <button type="button" id="killButton" onclick="killScript();">KILL SCRIPT</button>
+  </div>
+  <div id="chart-container">
+    <canvas id="main_chart"></canvas>
+  </div>
+  <div id="event-log">
+  </div>
+  <div id="side-container">
+    <div  id="positions">
+      <h5 style="margin: 5px; font-weight: bold;">Positions</h5>
+      <div id="positions-title">
+        <p class="position-fragment">Symbol </p>
+        <p class="position-fragment">Qty</p>
+        <p class="position-fragment">Side</p>
+        <p class="position-fragment">+/-</p>
+      </div>
+      <div id="positions-log">
+
+      </div>
+    </div>
+    <div id="orders">
+      <h5 style="margin: 5px; font-weight: bold;">Orders</h5>
+      <div id="order-title">
+        <p class="order-fragment">Symbol</p>
+        <p class="order-fragment">Qty</p>
+        <p class="order-fragment">Side</p>
+        <p class="order-fragment">Type</p>
+      </div>
+      <div id="orders-log">
+
+      </div>
+    </div>
+  </div>
+<div id="card-container">
+  <div class="content">
+     <!-- card -->
+     <div id="posCard" onclick="navPos();" class="card">
+
+           <div class="icon"><i class="material-icons md-36">list</i></div>
+           <p class="title">Positions</p>
+           <p class="text">View all open positions and open orders. </p>
+
+     </div>
+     <!-- end card -->
+     <!-- card -->
+     <div  id="graph"onclick="navGraph();"class="card">
+
+           <div class="icon"><i class="material-icons md-36">trending_up</i></div>
+           <p class="title">Graph</p>
+           <p class="text">View your portfolio's performance graph.</p>
+
+     </div>
+     <!-- end card -->
+     <!-- card -->
+     <div id="terminal" onclick="navTerminal();"class="card">
+
+           <div class="icon"><i class="material-icons md-36">code</i></div>
+           <p class="title">TERMINAL</p>
+           <p class="text">View the algorithm making decisions.</p>
+
+     </div>
+     <!-- end card -->
+
+
+
+   </div>
+ </div>
+
+  <div id="data-container">
+  </div>
+  <script src="main_page.js"></script>
+</body>

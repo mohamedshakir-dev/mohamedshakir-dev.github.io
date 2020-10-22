@@ -1,0 +1,146 @@
+@font-face {
+    font-family: 'eliantoregular';
+    src: url('Fonts/Elianto/elianto-regular-webfont.woff2') format('woff2'),
+         url('Fonts/Elianto/elianto-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+html , body{
+  background-color: white;
+}
+
+#data-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  height: 50vh;
+  width: 90vw;
+  margin: 0 auto;
+}
+#bottom-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  height: 30vh;
+  width: 60vw;
+  margin: 0 auto;
+}
+#title-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  height: 20vh;
+  width: 80vw;
+  margin: 0 auto;
+}
+#input-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+#side-container {
+  height: 100%;
+  width: 100%;
+}
+.control-button {
+  width: 150px;
+  margin: auto;
+}
+#event-log {
+  height: 50vh;
+  width: 20vw;
+  border: 1px solid black;
+  border-radius: 10px;
+  overflow-y: scroll;
+}
+
+#input-title {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#api-key {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#api-secret {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#main_chart {
+  height: 50vh;
+  width: 50vw;
+}
+#header-container{
+  max-width: 100%;
+  margin: auto;
+
+
+}
+#body-container{
+  max-width:100%;
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+#right-panel{
+  height: 500px;
+  width: 225px;
+  background-color: #2d7ddc;
+  margin-left: 40px;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 50px #fff,
+    inset 20px 0 80px #f0f,
+    inset -20px 0 80px #0ff,
+    inset 20px 0 300px #f0f,
+    inset -20px 0 300px #0ff,
+    0 0 30px #fff,
+    -10px 0 40px #f0f,
+    10px 0 40px #0ff;
+  cursor: pointer;
+
+}
+#right-panel:hover{
+  -webkit-transition: all 0.5s;
+  box-shadow:
+    inset 0 0 50px #fff,
+    inset 20px 0 80px #f0f,
+    inset -20px 0 80px #0ff,
+    inset 20px 0 300px #f0f,
+    inset -20px 0 300px #0ff,
+    0 0 50px #fff,
+    -10px 0 80px #f0f,
+    10px 0 80px #0ff;
+}
+
+.position-inst {
+  width: 20vw;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+.order-inst {
+  width: 20vw;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+.position-fragment {
+  margin: 5px;
+  width: calc(20vw / 4);
+}
+.order-fragment {
+  margin: 5px;
+  width: calc(20vw / 4);
+}
+.event-fragment {
+  margin: 5px;
+}
