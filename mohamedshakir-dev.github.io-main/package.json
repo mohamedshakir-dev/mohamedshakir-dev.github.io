@@ -1,0 +1,16 @@
+{
+  "name": "alpaca",
+  "version": "1.0.0",
+  "description": "Trading Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@alpacahq/alpaca-trade-api": "^1.4.1",
+    "chart.js": "^2.9.3",
+    "dotenv": "^8.2.0"
+  }
+}
