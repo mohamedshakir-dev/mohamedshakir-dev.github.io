@@ -5,11 +5,14 @@
     <title></title>
   </head>
   <link rel="stylesheet" type="text/css" href="animation.css">
-  <script src="main.js"></script>
   <script src="animation.js"></script>
-  <link href="browser-trader.html">
-  <script src="long-short-browser.js"></script>
+  <script src="Dependancies/cors-api.js"></script>
+  <script src="Dependancies/Algorithm.js"></script>
   <body>
+    <div id="Alert" class="alert">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+      <strong>Invalid Credentials.</strong> Enter valid API keys.
+    </div>
   <div class="wrapper">
     <div id="sun">
       <form id="form">
@@ -32,10 +35,6 @@
 </div>
 
 
-<!-- <div class="alert">
-  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-  <strong>Incorrect Password.</strong> Contact an admin if you have problems logging in.
-</div> -->
 
 
   </body>

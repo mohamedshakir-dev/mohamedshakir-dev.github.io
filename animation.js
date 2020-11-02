@@ -1,6 +1,3 @@
-(function() {
-  ('.luminaire:nth-child(2n)').addClass('on');
-  ('.luminaire').on('click', function() {
-    (this).toggleClass('on');
-  });
-});
+window.onload = function(){
+  document.getElementById("Alert").style.display = 'none';
+}

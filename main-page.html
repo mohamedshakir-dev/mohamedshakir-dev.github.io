@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <title>Trading Bot</title>
@@ -13,12 +14,20 @@
   <!-- Local files -->
   <link rel="stylesheet" type="text/css" href="browser-trader-style.css"/>
   <link rel="stylesheet" type="text/css" href="mainpage.css">
-  <script src="Charts.js"></script>
-  <script src="long-short-browser.js"></script>
-  <script src="cors-api.js"></script>
+  <script src="Dependancies/Charts.js"></script>
+  <script src="Dependancies/Algorithm.js"></script>
+  <script src="Dependancies/cors-api.js"></script>
   <script src="main.js"></script>
 </head>
-<body style="background-color:#161616">
+<body>
+  <i id="settings" onclick="openSetting();"class="material-icons" style="font-size:36px">settings</i>
+    <div id="settingsCard">
+      <i id="backButton" onclick="goHome();"class="material-icons" style="font-size:48px">arrow_back</i>
+      <div class="switch-wrapper">
+        Toggle Light and Dark mode.
+        <input onclick="switchBackground();" type="checkbox" name="checkbox" class="switch">
+      </div>
+      </div>
   <div id=header-container>
       <button type="button" id="runButton" onclick="runScript();">RUN SCRIPT</button>
       <button type="button" id="killButton" onclick="killScript();">KILL SCRIPT</button>
@@ -42,7 +51,7 @@
       </div>
     </div>
     <div id="orders">
-      <h5 style="margin: 5px; font-weight: bold;">Orders</h5>
+      <h5 style="font-weight: bold;">Orders</h5>
       <div id="order-title">
         <p class="order-fragment">Symbol</p>
         <p class="order-fragment">Qty</p>
@@ -93,3 +102,4 @@
   </div>
   <script src="main_page.js"></script>
 </body>
+</html>

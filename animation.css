@@ -12,7 +12,7 @@ html, body {
     width : 90%;
 }
 .wrapper {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   z-index: 100;
@@ -243,14 +243,17 @@ html, body {
     cursor: pointer;
 }
 .alert {
-  margin-left: 25%;
-  margin-top: 10%;
+  width: 50%;
+  margin-left: 27%;
+  margin-top: 7%;
   padding: 20px;
   background-color: #f44336; /* Red */
   color: white;
   margin-bottom: 15px;
   font-family: eliantoregular;
   background-color: #2d7ddc;
+  z-index: 1000;
+  position: absolute;
   box-shadow:
     inset 0 0 50px #fff,
     inset 20px 0 80px #f0f,
@@ -264,6 +267,7 @@ html, body {
 
 /* The close button */
 .closebtn {
+  z-index: 1000;
   margin-left: 15px;
   color: white;
   font-weight: bold;
