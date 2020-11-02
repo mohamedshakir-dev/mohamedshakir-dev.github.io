@@ -96,7 +96,7 @@ class LongShort {
         await this.rebalance();
         this.updateChart();
       }
-    }, 60000);
+    }, 120000);
   }
   // Spin until the market is open.
   awaitMarketOpen(){
@@ -122,7 +122,7 @@ class LongShort {
                 writeToEventLog(this.timeToClose + " minutes til next market open.");
               }
             }).catch((err) => {writeToEventLog(err);});
-          }, 60000);
+          }, 120000);
         }
       });
     });
@@ -568,6 +568,7 @@ function enter2 (){
   var ls = new LongShort(apikey, secretkey);
   localStorage.setItem("API_KEY", apikey);
   localStorage.setItem("SECRET_KEY", secretkey);
+
   fetch('https://cors-anywhere.herokuapp.com/https://data.alpaca.markets/v1', {
     headers: {
         'APCA-API-KEY-ID': apikey,
@@ -584,9 +585,7 @@ function enter2 (){
          document.getElementById("Alert").style.display = 'block';
        }
      })
-    .catch(function(error)
-    {
-    });
+    .catch(function(error){});
 
 
     // window.location.href = "main-page.html";
