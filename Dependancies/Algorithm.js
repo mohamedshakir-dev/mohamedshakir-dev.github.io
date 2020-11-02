@@ -96,7 +96,7 @@ class LongShort {
         await this.rebalance();
         this.updateChart();
       }
-    }, 120000);
+    }, 60000);
   }
   // Spin until the market is open.
   awaitMarketOpen(){
@@ -122,7 +122,7 @@ class LongShort {
                 writeToEventLog(this.timeToClose + " minutes til next market open.");
               }
             }).catch((err) => {writeToEventLog(err);});
-          }, 120000);
+          }, 60000);
         }
       });
     });
