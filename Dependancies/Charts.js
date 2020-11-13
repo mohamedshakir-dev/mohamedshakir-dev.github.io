@@ -3,6 +3,8 @@
  * https://www.chartjs.org
  * (c) 2019 Chart.js Contributors
  * Released under the MIT License
+ * NOTE: CODE NOT WRITTEN BY ME, MOHAMED SHAKIR, charts.js IS MIT LICENSE AND FULL DOCUMENTION
+ * CAN BE FOUND AT THE LINK ABOVE. ALL THIS CODE IS SOURCE CODE FROM chart.js FROM MIT
  */
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :

@@ -1,4 +1,4 @@
-class LongShort {
+class Alpaca {
   constructor(API_KEY,API_SECRET){
     this.alpaca = new AlpacaCORS({
       keyId: API_KEY,
@@ -6,14 +6,30 @@ class LongShort {
       baseUrl: 'https://paper-api.alpaca.markets'
     });
 
-    this.allStocks = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP', 'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR', 'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM', 'RTN', 'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM'];
-    // Format the allStocks variable for use in the class.
+
+    this.allStocks = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
+                      'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
+                      'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM', 'RTN',
+                      'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM']; /* Array Used To Store ALL stocks
+                                                                    the algorithm will be trading with.
+                                                                    Can be modified easily by changing or
+                                                                    adding ticker symbols.
+                                                                  */
+
+    /*
+    Temp Array used to store temporary data. For Loop initializes temp array
+    for all the stocks in the preset array.
+    */
     var temp = [];
     this.allStocks.forEach((stockName) => {
       temp.push({name: stockName, pc: 0});
     });
     this.allStocks = temp.slice();
 
+    /*
+    Variables and Arrays for storing Data. All of them are initialized empty
+    and will be filled based on the users data.
+    */
     this.long = [];
     this.short = [];
     this.qShort = null;
@@ -31,8 +47,12 @@ class LongShort {
     this.positions = [];
   }
 
+  /*
+  * Asynchronous function, runs the script. Starts by looping through all the orders
+  * and closes all open positions. Awaits for all promises to be resolved before
+  * continuing. Each action is commented further below.
+  */
   async run(){
-    // First, cancel any existing orders so they don't impact our buying power.
     var orders;
     await this.alpaca.getOrders({
       status: "open",
@@ -49,56 +69,83 @@ class LongShort {
     });
     await Promise.all(promOrders);
 
-    // Wait for market to open.
+  // Waits for market to open. Writes to terminal as it awaits for market open
     writeToEventLog("Waiting for market to open...");
     var promMarket = this.awaitMarketOpen();
     await promMarket;
     writeToEventLog("Market opened.");
 
-    // Rebalance the portfolio every minute, making necessary trades.
+    /*
+     * Rebalances the portfolio every 60 seconds. If any changes need to be made
+     * the algorithm will make new trades accordingly
+     */
     this.spin = setInterval(async () => {
-
-      // Figure out when the market will close so we can prepare to sell beforehand.
+      /*
+      * Calculates time until the next market close (4:00 PM EST) to ensure trades
+      * can still be made within an appropriate time frame
+      */
       await this.alpaca.getClock().then((resp) =>{
         var closingTime = new Date(resp.next_close.substring(0,resp.next_close.length - 6));
         var currTime = new Date(resp.timestamp.substring(0,resp.timestamp.length - 6));
         this.timeToClose = Math.abs(closingTime - currTime);
       }).catch((err) => {writeToEventLog(err);});
 
+      /*
+      * Checks if time until the next market close is within 15 minutes,
+      * if the time is within 15 minutes of the next market close,
+      * the algorithm writes to the console and proceeds to close positions
+      * Checks the characteristics of each position and fills out an orders
+      * ticker accordinly, awaits all orders to be resolved before continuing
+      */
       if(this.timeToClose < (60000 * 15)) {
-        // Close all positions when 15 minutes til market close.
-        writeToEventLog("Market closing soon.  Closing positions.");
+        writeToEventLog("Market closing soon. Closing positions.");
 
         await this.alpaca.getPositions().then(async (resp) => {
           var promClose = [];
           resp.forEach((position) => {
             promClose.push(new Promise(async (resolve,reject) => {
               var orderSide;
-              if(position.side == 'long') orderSide = 'sell';
-              else orderSide = 'buy';
+              if(position.side == 'long'){
+                orderSide = 'sell';
+              } else{
+                orderSide = 'buy';
+              }
               var quantity = Math.abs(position.qty);
               await this.submitOrder(quantity,position.symbol,orderSide);
               resolve();
             }));
           });
-
           await Promise.all(promClose);
         }).catch((err) => {writeToEventLog(err);});
+        /*
+        * Rests for the remainder of the tradings day, writes to terminal to inform user
+        */
         clearInterval(this.spin);
         writeToEventLog("Sleeping until market close (15 minutes).");
         setTimeout(() => {
-          // Run script again after market close for next trading day.
+           // Runs script again to prepare the algorithm for the next trading day
           this.run();
         }, 60000*15);
       }
       else {
-        // Rebalance the portfolio.
+        /*
+        * Reblances portfolio and updates the chart every minute to continue
+        * if the day is further than 15 minutes from market closer
+        */
         await this.rebalance();
         this.updateChart();
       }
     }, 60000);
   }
-  // Spin until the market is open.
+
+  /*
+  * Function for waiting for market to open. Creates boolean variable for storing
+  * whether or not the market is open, then calls getClock method. Cross Origin Resource
+  * sends an HTTP request and returns clock. If the response states that the market is open,
+  * the promise is resolved and the program continues. Else it checks how long until the markets
+  * open and writes to the terminal informing the user of how long until the market opens. Then checks every
+  * minute afterwards.
+  */
   awaitMarketOpen(){
     var prom = new Promise(async (resolve, reject) => {
       var isOpen = false;
@@ -129,11 +176,14 @@ class LongShort {
     return prom;
   }
 
-  // Rebalance our position after an update.
+
+  /*
+  * Rebalances positions after each update
+  */
   async rebalance(){
     await this.rerank();
 
-    // Clear existing orders again.
+    // Cycles through all existing orders again.
     var orders;
     await this.alpaca.getOrders({
       status: 'open',
@@ -152,7 +202,11 @@ class LongShort {
 
     writeToEventLog("We are taking a long position in: " + this.long.toString());
     writeToEventLog("We are taking a short position in: " + this.short.toString());
-    // Remove positions that are no longer in the short or long list, and make a list of positions that do not need to change.  Adjust position quantities if needed.
+    /*
+    * Remove positions that are no longer on the list of positions
+    * that the algorithm is looking to take, and make a list of positions
+    * that do not need to change. Then adjusts quantities if needed.
+    */
     var positions;
     await this.alpaca.getPositions().then((resp) => {
       positions = resp;
@@ -164,9 +218,9 @@ class LongShort {
     positions.forEach((position) => {
       promPositions.push(new Promise(async (resolve, reject) => {
         if(this.long.indexOf(position.symbol) < 0){
-          // Position is not in long list.
+          // Checks if position is on the list of long equities
           if(this.short.indexOf(position.symbol) < 0){
-            // Position not in short list either.  Clear position.
+            // checks if position on the list for short equities, if not on either than closes position
             if(position.side == "long") side = "sell";
             else side = "buy";
             var promCO = this.submitOrder(Math.abs(position.qty), position.symbol, side);
@@ -181,17 +235,17 @@ class LongShort {
             }
             else {
               if(Math.abs(position.qty) == this.qShort){
-                // Position is where we want it.  Pass for now.
+                // If the position is where it is supposed to be, continue for now.
               }
               else{
-                // Need to adjust position amount
+                // Position quantity needs to be adjusted
                 var diff = Number(Math.abs(position.qty)) - Number(this.qShort);
                 if(diff > 0){
-                  // Too many short positions.  Buy some back to rebalance.
+                  // If there are too many quantities short, need to buy more to rebalance position
                   side = "buy"
                 }
                 else{
-                  // Too little short positions.  Sell some more.
+                  // If the short quantity is too low, sell more to rebalance portfolio
                   side = "sell"
                 }
                 var promRebalance = this.submitOrder(Math.abs(diff), position.symbol, side);
@@ -204,7 +258,7 @@ class LongShort {
           }
         }
         else{
-          // Position in long list.
+            // Repeats process for other side.
           if(position.side == "short"){
             // Position changed from short to long.  Clear short position and long instead.
             var promCS = this.submitOrder(Math.abs(position.qty), position.symbol, "buy");
@@ -212,17 +266,13 @@ class LongShort {
           }
           else{
             if(position.qty == this.qLong){
-              // Position is where we want it.  Pass for now.
             }
             else{
-              // Need to adjust position amount.
               var diff = Number(position.qty) - Number(this.qLong);
               if(diff > 0){
-                // Too many long positions.  Sell some to rebalance.
                 side = "sell";
               }
               else{
-                // Too little long positions.  Buy some more.
                 side = "buy";
               }
               var promRebalance = this.submitOrder(Math.abs(diff), position.symbol, side);
@@ -237,7 +287,7 @@ class LongShort {
     });
     await Promise.all(promPositions);
 
-    // Send orders to all remaining stocks in the long and short list.
+    // Sends order with all the adjusted position quantities, which list they are on, and their side.
     var promLong = this.sendBatchOrder(this.qLong, this.long, 'buy');
     var promShort = this.sendBatchOrder(this.qShort, this.short, 'sell');
 
@@ -246,7 +296,7 @@ class LongShort {
     this.adjustedQShort = -1;
 
     await Promise.all([promLong, promShort]).then(async (resp) => {
-      // Handle rejected/incomplete orders.
+      // Handler for rejected promises.
       resp.forEach(async (arrays, i) => {
         promBatches.push(new Promise(async (resolve, reject) => {
           if(i == 0) {
@@ -257,7 +307,7 @@ class LongShort {
             arrays[1] = arrays[1].concat(executed.short);
             executed.short = arrays[1].slice();
           }
-          // Return orders that didn't complete, and determine new quantities to purchase.
+          // Return rejected orders and determines if new quanties are required for purchase.
           if(arrays[0].length > 0 && arrays[1].length > 0){
             var promPrices = this.getTotalPrice(arrays[1]);
 
@@ -278,7 +328,7 @@ class LongShort {
       });
       await Promise.all(promBatches);
     }).then(async () => {
-      // Reorder stocks that didn't throw an error so that the equity quota is reached.
+      // Reorders stocks that did were resolved successfully so that the equity quota is reached.
       var promReorder = new Promise(async (resolve, reject) => {
         var promLong = [];
         if(this.adjustedQLong >= 0){
@@ -313,8 +363,9 @@ class LongShort {
     });
   }
 
-  // Re-rank all stocks to adjust longs and shorts.
+  // Re-ranks all stocks to create new list of short and long positions accordingly
   async rerank(){
+    // Calls rank function again to resort the list of stocks
     await this.rank();
 
     // Grabs the top and bottom quarter of the sorted stock list to get the long and short lists.
@@ -327,12 +378,12 @@ class LongShort {
       else continue;
     }
 
-    // Determine amount to long/short based on total stock price of each bucket.
+    // Determines quantity based on price of each stock in each list
     var equity;
     await this.alpaca.getAccount().then((resp) => {
       equity = resp.equity;
     }).catch((err) => {writeToEventLog(err);});
-    this.shortAmount = 0.30 * equity;
+    this.shortAmount = 0.30 * equity; // Sets the max equity available to be tied up in short positions to 30% of total equity.
     this.longAmount = Number(this.shortAmount) + Number(equity);
 
     var promLong = await this.getTotalPrice(this.long);
@@ -363,7 +414,10 @@ class LongShort {
     return proms;
   }
 
-  // Submit an order if quantity is above 0.
+  /*
+  * Submit an order for all stocks with a quanity above 0. Writes to terminal all trades that are made or
+  * that are unsuccessful
+  */
   async submitOrder(quantity, stock, side){
     var prom = new Promise(async (resolve, reject) => {
       if(quantity > 0){
@@ -389,7 +443,7 @@ class LongShort {
     return prom;
   }
 
-  // Submit a batch order that returns completed and uncompleted orders.
+  // Sends a batch order for all the stocks on a given list and returns all rejected or fulfilled promises.
   async sendBatchOrder(quantity, stocks, side){
     var prom = new Promise(async (resolve, reject) => {
       var incomplete = [];
@@ -397,7 +451,7 @@ class LongShort {
       var promOrders = [];
       stocks.forEach(async (stock) => {
         promOrders.push(new Promise(async (resolve, reject) => {
-          if(!this.blacklist.has(stock)){
+          if(!this.blacklist.has(stock)){ // Checks if the stock is not blacklisted, if it is not black listed create new order ticket
             var promSO = this.submitOrder(quantity, stock, side);
             await promSO.then((resp) => {
               if(resp) executed.push(stock);
@@ -415,7 +469,12 @@ class LongShort {
     return prom;
   }
 
-  // Get percent changes of the stock prices over the past 10 minutes.
+  /*
+   * Calculates stock price action by checking the stock price over an interval of time (10 minutes)
+   * Then stores the percent change in the .pc modifier. This is an essential piece of the ranking function since
+   * the change is price over a short period of time is the primary factor for which stock the algorithm
+   * finds desiriable then it decides which side to take also depending on the price action.
+   */
   getPercentChanges(allStocks){
     var length = 10;
     var promStocks = [];
@@ -430,27 +489,37 @@ class LongShort {
     return promStocks;
   }
 
-  // Mechanism used to rank the stocks, the basis of the Long-Short Equity Strategy.
+  /*
+   * Function for ranking stocks, the premise of this algorithms trading mechanism.
+   */
   async rank(){
-    // Ranks all stocks by percent change over the past 10 minutes (higher is better).
+    // Starts by obtaining the percent change of all the stocks then waits for all promises to be resolved.
     var promStocks = this.getPercentChanges(this.allStocks);
     await Promise.all(promStocks);
-
-    // Sort the stocks in place by the percent change field (marked by pc).
+    /*
+     * Sorts the array of stocks based on their precent change, the algorithm will later take
+     * long positions on the better perfomring stocks and short the worse ones.
+     */
     this.allStocks.sort((a, b) => {return a.pc - b.pc;});
   }
 
+  /*
+   * Function for killing script, clears algorithm and rebalances the portfolio
+   * until all positions are closed.
+   */
   kill() {
     clearInterval(this.marketChecker);
     clearInterval(this.spin);
     throw new error("Killed script");
   }
 
-
+  /*
+   * Initializes chart through chart.js framework
+   */
   async init() {
-    var prom = this.getTodayOpenClose();
-    await prom.then((resp) => {
-      this.chart = new Chart(document.getElementById("main_chart"), {
+    var prom = this.getTodayOpenClose(); // Creates variable to store promise object for the days open and close
+    await prom.then((resp) => { // awaits for chart to be succesfully resolved
+      this.chart = new Chart(document.getElementById("main_chart"), { // Creates new chart and passes user data for the headers
         type: 'line',
         data: {
           datasets: [{
@@ -478,10 +547,11 @@ class LongShort {
           },
         }
       });
-      this.updateChart();
+      this.updateChart(); // will continue to update chart
     });
   }
 
+  // Updates chart by pushing new user portfolio data, changes y axis dataset to the new user equity
   updateChart() {
     this.alpaca.getAccount().then((resp) => {
       this.chart.data.datasets[0].data.push({
@@ -490,10 +560,16 @@ class LongShort {
       });
       this.chart.update();
     });
-    this.updateOrders();
+    this.updateOrders(); // Updates positions and orders in case any changed were made
     this.updatePositions();
   }
 
+  /*
+   * Gets the open and close time, this is done simply through JavaScript, the program gets the time and date
+   * to create a new Date object, then sets the offset to the appropriate time zone for the New York Stock Exchange
+   * and does the appropriate conversion. Then sets the open and close time to the users time account for the difference
+   * in the offset as well as the open and close time of the New York Stock Exchange (9:30 AM - 4:00 PM)
+   */
   getTodayOpenClose() {
     return new Promise(async (resolve,reject) => {
       await this.alpaca.getClock().then(async (resp) => {
@@ -519,6 +595,7 @@ class LongShort {
     });
   }
 
+  // Obtains users data and gets new/modified positions to append the positions log with the updated data from each position.
   updatePositions() {
     $("#positions-log").empty();
     this.alpaca.getPositions().then((resp) => {
@@ -534,7 +611,11 @@ class LongShort {
       })
     })
   }
-
+/*
+ * Works the same way as positions method, except for the getOrders() function, the header: status is passed
+ * to specify that we only want the open orders and not any closed orders so that the list does not get populated
+ * with old orders.
+ */
   updateOrders() {
     $("#orders-log").empty();
     this.alpaca.getOrders({
@@ -552,20 +633,18 @@ class LongShort {
       })
     })
   }
-}
+} // End class Alpaca
 
-// function runScript(){
-//    if(document.getElementById('runButton').innerText = 'RUN')
-//   var API_SECRET = localStorage.getItem("SECRET_KEY");
-//   var API_KEY  = localStorage.getItem("API_KEY");
-//   var ls = new LongShort(API_KEY,API_SECRET);
-//   ls.init();
-//   ls.run();
-// }
-function enter2 (){
+/*
+ * The primary login function. When the login button is clicked, the text fields data is saved and initialized
+ * in a new Alpaca. Then, a fetch request is sent to recieve a response from the server. If the servers
+ * response is an error, then the error message "Invalid Keys" is shown to alert the user. Only if the error
+ * is not an unauthorized error, then the user has entered valid keys and is navigated to the main page.
+ */
+function checkKeys (){
   var apikey = document.getElementById("api-key").value;
   var secretkey = document.getElementById("secret-key").value;
-  var ls = new LongShort(apikey, secretkey);
+  var ls = new Alpaca(apikey, secretkey);
   localStorage.setItem("API_KEY", apikey);
   localStorage.setItem("SECRET_KEY", secretkey);
   fetch('https://cors-anywhere.herokuapp.com/https://data.alpaca.markets/v1', {
@@ -573,36 +652,25 @@ function enter2 (){
         'APCA-API-KEY-ID': apikey,
         'APCA-API-SECRET-KEY': secretkey
     }
-}) .then(function(response)
-     {
-      if(response.status!==403)
-       {
-          window.location.href = "main-page.html";
+  }) .then(function(response){
+      if(response.status!==403) {
+          window.location.href = "../Main-page/main-page.html";
           throw new Error(response.status)
        }
        else{
          document.getElementById("Alert").style.display = 'block';
        }
      })
-    .catch(function(error)
-    {
+    .catch(function(error){
+      throw new error(response.status);
     });
-
-
-    // window.location.href = "main-page.html";
 }
-// async function checkAuth() {
-//   await this.alpaca.getAccount().then((resp) => {
-//     localStorage.setItem("AUTH", 1);
-//   }).catch((err) => {
-//     localStorage.setItem("AUTH",0);
-//   });
-// }
-
+// Kills the script and alerts the user in the terminal by writting to the event log.
 function killScript(){
   $("#event-log").html("Killing script.");
   ls.kill();
 }
+// Simply writes to event log, recieves any text and simply adds it to the log.
 function writeToEventLog(text) {
   $("#event-log").prepend(`<p class="event-fragment">${text}</p>`)
 }
